@@ -1,22 +1,5 @@
-/*
-* Copyright 2020 elementary, Inc. (https://elementary.io)
-*           2015 Ivo Nunes, Akshay Shekher
-*
-* This program is free software; you can redistribute it and/or
-* modify it under the terms of the GNU General Public
-* License as published by the Free Software Foundation; either
-* version 3 of the License, or (at your option) any later version.
-*
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-* General Public License for more details.
-*
-* You should have received a copy of the GNU General Public
-* License along with this program; if not, write to the
-* Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-* Boston, MA 02110-1301 USA
-*/
+using System.IO;
+using System.Collections.Generic;
 
 public class About.Plug : Switchboard.Plug {
     private const string OPERATING_SYSTEM = "operating-system";
@@ -26,15 +9,33 @@ public class About.Plug : Switchboard.Plug {
     private Gtk.Grid main_grid;
     private Gtk.Stack stack;
 
+    private Dictionary<string, string> ReadOsRelease() {
+        var osReleasePath = "/etc/os-release";
+        var osReleaseInfo = new Dictionary<string, string>();
+
+        if (File.Exists(osReleasePath)) {
+            var lines = File.ReadAllLines(osReleasePath);
+            foreach (var line in lines) {
+                var parts = line.Split(new char[] { '=' }, 2);
+                if (parts.Length == 2) {
+                    osReleaseInfo[parts[0]] = parts[1].Trim(new char[] { '"', ' ' });
+                }
+            }
+        }
+
+        return osReleaseInfo;
+    }
+
     public Plug () {
         GLib.Intl.bindtextdomain (About.GETTEXT_PACKAGE, About.LOCALEDIR);
         GLib.Intl.bind_textdomain_codeset (About.GETTEXT_PACKAGE, "UTF-8");
 
+        var osReleaseInfo = ReadOsRelease();
+        var osName = osReleaseInfo.ContainsKey("NAME") ? osReleaseInfo["NAME"] : "Unknown OS";
+
         var settings = new Gee.TreeMap<string, string?> (null, null);
         settings.set ("about", null);
-        settings.set ("about/os", OPERATING_SYSTEM);
-        settings.set ("about/hardware", HARDWARE);
-        settings.set ("about/firmware", FIRMWARE);
+        settings.set ("about/os", osName);
 
         Object (
             category: Category.SYSTEM,
@@ -100,7 +101,6 @@ public class About.Plug : Switchboard.Plug {
         }
     }
 
-    // 'search' returns results like ("Keyboard → Behavior → Duration", "keyboard<sep>behavior")
     public override async Gee.TreeMap<string, string> search (string search) {
         var search_results = new Gee.TreeMap<string, string> (
             (GLib.CompareDataFunc<string>)strcmp,
