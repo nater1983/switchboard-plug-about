@@ -50,16 +50,18 @@ public class About.Plug : Switchboard.Plug {
             supported_settings: settings
         );
     }
-  private Dictionary<string, string> ReadOsRelease()
+
+    private Dictionary<string, string> ReadOsRelease()
     {
         var osInfo = new Dictionary<string, string>();
 
         try
         {
-            using (var streamReader = new System.IO.StreamReader("/etc/os-release"))
+            var filePath = "/etc/os-release";
+            if (File.Exists(filePath))
             {
-                string line;
-                while ((line = streamReader.ReadLine()) != null)
+                var lines = System.IO.File.ReadAllLines(filePath);
+                foreach (var line in lines)
                 {
                     var parts = line.Split('=');
                     if (parts.Length == 2)
@@ -89,9 +91,9 @@ public class About.Plug : Switchboard.Plug {
             var osInfo = ReadOsRelease();
 
             // Display operating system information
-            var osNameLabel = new Label(osInfo.ContainsKey("PRETTY_NAME") ? osInfo["PRETTY_NAME"] : "Operating System Information Not Available");
-            var osVersionLabel = new Label(osInfo.ContainsKey("VERSION_ID") ? "Version: " + osInfo["VERSION_ID"] : "Version Information Not Available");
-            var osInfoBox = new Box(Orientation.Vertical, 10);
+            var osNameLabel = new Gtk.Label(osInfo.ContainsKey("PRETTY_NAME") ? osInfo["PRETTY_NAME"] : "Operating System Information Not Available");
+            var osVersionLabel = new Gtk.Label(osInfo.ContainsKey("VERSION_ID") ? "Version: " + osInfo["VERSION_ID"] : "Version Information Not Available");
+            var osInfoBox = new Gtk.Box(Orientation.Vertical, 10);
             osInfoBox.PackStart(osNameLabel, false, false, 0);
             osInfoBox.PackStart(osVersionLabel, false, false, 0);
             operating_system_view.add(osInfoBox);
