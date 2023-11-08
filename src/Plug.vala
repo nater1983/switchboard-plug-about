@@ -22,7 +22,6 @@ using System;
 using Gtk;
 using GLib;
 using Gee;
-using System.Collections.Generic; // Include the dictionary class here
 
 public class About.Plug : Switchboard.Plug {
     private const string OPERATING_SYSTEM = "operating-system";
@@ -52,9 +51,9 @@ public class About.Plug : Switchboard.Plug {
         );
     }
 
-    private System.Collections.Hashtable ReadOsRelease()
+    private Hashtable ReadOsRelease()
     {
-        var osInfo = new System.Collections.Hashtable();
+        var osInfo = new Hashtable();
 
         try
         {
