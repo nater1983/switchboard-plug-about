@@ -22,6 +22,7 @@ using System;
 using Gtk;
 using GLib;
 using Gee;
+using System.Collections.Generic; // Include the dictionary class here
 
 public class About.Plug : Switchboard.Plug {
     private const string OPERATING_SYSTEM = "operating-system";
