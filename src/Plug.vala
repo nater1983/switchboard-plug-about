@@ -64,7 +64,70 @@ public class About.Plug : Switchboard.Plug
             operating_system_view.add(osInfoBox);
 
             // Other views remain unchanged
-            var hardware_view = new HardwareView() { valign = Gtk.Align.CENTER };
-            var firmware_view = new FirmwareView();
+            stack.add_titled (operating_system_view, OPERATING_SYSTEM, _("Operating System"));
+            stack.add_titled (hardware_view, HARDWARE, _("Hardware"));
+            stack.add_titled (firmware_view, FIRMWARE, _("Firmware"));
 
-            // The rest of the code remains unchanged.
+            var stack_switcher = new Gtk.StackSwitcher () {
+                halign = Gtk.Align.CENTER,
+                homogeneous = true,
+                margin_top = 24,
+                stack = stack
+            };
+
+            main_grid = new Gtk.Grid () {
+                row_spacing = 12
+            };
+            main_grid.attach (stack_switcher, 0, 0);
+            main_grid.attach (stack, 0, 1);
+            main_grid.show_all ();
+        }
+
+        return main_grid;
+    }
+
+    public override void shown () {
+    }
+
+    public override void hidden () {
+    }
+
+    public override void search_callback (string location) {
+        switch (location) {
+            case OPERATING_SYSTEM:
+            case HARDWARE:
+            case FIRMWARE:
+                stack.set_visible_child_name (location);
+                break;
+            default:
+                stack.set_visible_child_name (OPERATING_SYSTEM);
+                break;
+        }
+    }
+
+    // 'search' returns results like ("Keyboard → Behavior → Duration", "keyboard<sep>behavior")
+    public override async Gee.TreeMap<string, string> search (string search) {
+        var search_results = new Gee.TreeMap<string, string> (
+            (GLib.CompareDataFunc<string>)strcmp,
+            (Gee.EqualDataFunc<string>)str_equal
+        );
+
+        search_results.set ("%s → %s".printf (display_name, _("Operating System Information")), OPERATING_SYSTEM);
+        search_results.set ("%s → %s".printf (display_name, _("Hardware Information")), HARDWARE);
+        search_results.set ("%s → %s".printf (display_name, _("Firmware")), FIRMWARE);
+        search_results.set ("%s → %s".printf (display_name, _("Restore Default Settings")), OPERATING_SYSTEM);
+        search_results.set ("%s → %s".printf (display_name, _("Suggest Translations")), OPERATING_SYSTEM);
+        search_results.set ("%s → %s".printf (display_name, _("Send Feedback")), OPERATING_SYSTEM);
+        search_results.set ("%s → %s".printf (display_name, _("Report a Problem")), OPERATING_SYSTEM);
+        search_results.set ("%s → %s".printf (display_name, _("Get Support")), OPERATING_SYSTEM);
+        search_results.set ("%s → %s".printf (display_name, _("Updates")), OPERATING_SYSTEM);
+
+        return search_results;
+    }
+}
+
+public Switchboard.Plug get_plug (Module module) {
+    debug ("Activating System plug");
+    var plug = new About.Plug ();
+    return plug;
+}
