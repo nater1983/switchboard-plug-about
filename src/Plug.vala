@@ -52,14 +52,14 @@ public class About.Plug : Switchboard.Plug {
         );
     }
 
-    private Dictionary<string, string> ReadOsRelease()
+    private System.Collections.Hashtable ReadOsRelease()
     {
-        var osInfo = new Dictionary<string, string>();
+        var osInfo = new System.Collections.Hashtable();
 
         try
         {
             var filePath = "/etc/os-release";
-            if (File.Exists(filePath))
+            if (System.IO.File.Exists(filePath))
             {
                 var lines = System.IO.File.ReadAllLines(filePath);
                 foreach (var line in lines)
