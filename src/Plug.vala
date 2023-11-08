@@ -18,29 +18,62 @@
 * Boston, MA 02110-1301 USA
 */
 
-using System.IO;
-using System.Collections.Generic;
+using System;
+using Gtk;
+using GLib;
+using Gee;
 
-public class About.Plug : Switchboard.Plug
-{
-    // ... (Rest of the original code)
+public class About.Plug : Switchboard.Plug {
+    private const string OPERATING_SYSTEM = "operating-system";
+    private const string HARDWARE = "hardware";
+    private const string FIRMWARE = "firmware";
 
-    private Dictionary<string, string> ReadOsRelease()
+    private Gtk.Grid main_grid;
+    private Gtk.Stack stack;
+
+    public Plug () {
+        GLib.Intl.bindtextdomain (About.GETTEXT_PACKAGE, About.LOCALEDIR);
+        GLib.Intl.bind_textdomain_codeset (About.GETTEXT_PACKAGE, "UTF-8");
+
+        var settings = new Gee.TreeMap<string, string?> (null, null);
+        settings.set ("about", null);
+        settings.set ("about/os", OPERATING_SYSTEM);
+        settings.set ("about/hardware", HARDWARE);
+        settings.set ("about/firmware", FIRMWARE);
+
+        Object (
+            category: Category.SYSTEM,
+            code_name: "io.elementary.switchboard.about",
+            display_name: _("System"),
+            description: _("View operating system and hardware information"),
+            icon: "application-x-firmware",
+            supported_settings: settings
+        );
+    }
+  private Dictionary<string, string> ReadOsRelease()
     {
-        var osReleasePath = "/etc/os-release";
         var osInfo = new Dictionary<string, string>();
 
-        if (File.Exists(osReleasePath))
+        try
         {
-            var lines = File.ReadAllLines(osReleasePath);
-            foreach (var line in lines)
+            using (var streamReader = new System.IO.StreamReader("/etc/os-release"))
             {
-                var parts = line.Split('=');
-                if (parts.Length == 2)
+                string line;
+                while ((line = streamReader.ReadLine()) != null)
                 {
-                    osInfo[parts[0].Trim()] = parts[1].Trim().Trim('\"');
+                    var parts = line.Split('=');
+                    if (parts.Length == 2)
+                    {
+                        osInfo[parts[0].Trim()] = parts[1].Trim().Trim('\"');
+                    }
                 }
             }
+        }
+        catch (Exception e)
+        {
+            // Handle the exception here, such as logging or displaying an error message
+            // Console.WriteLine("The file could not be read:");
+            // Console.WriteLine(e.Message);
         }
 
         return osInfo;
@@ -56,9 +89,9 @@ public class About.Plug : Switchboard.Plug
             var osInfo = ReadOsRelease();
 
             // Display operating system information
-            var osNameLabel = new Gtk.Label(osInfo.ContainsKey("PRETTY_NAME") ? osInfo["PRETTY_NAME"] : "Operating System Information Not Available");
-            var osVersionLabel = new Gtk.Label(osInfo.ContainsKey("VERSION_ID") ? "Version: " + osInfo["VERSION_ID"] : "Version Information Not Available");
-            var osInfoBox = new Gtk.Box(Gtk.Orientation.VERTICAL, 10);
+            var osNameLabel = new Label(osInfo.ContainsKey("PRETTY_NAME") ? osInfo["PRETTY_NAME"] : "Operating System Information Not Available");
+            var osVersionLabel = new Label(osInfo.ContainsKey("VERSION_ID") ? "Version: " + osInfo["VERSION_ID"] : "Version Information Not Available");
+            var osInfoBox = new Box(Orientation.Vertical, 10);
             osInfoBox.PackStart(osNameLabel, false, false, 0);
             osInfoBox.PackStart(osVersionLabel, false, false, 0);
             operating_system_view.add(osInfoBox);
