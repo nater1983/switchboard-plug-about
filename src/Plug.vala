@@ -18,7 +18,6 @@
 * Boston, MA 02110-1301 USA
 */
 
-using System;
 using Gtk;
 using GLib;
 using Gee;
@@ -51,9 +50,9 @@ public class About.Plug : Switchboard.Plug {
         );
     }
 
-    private Hashtable ReadOsRelease()
+    private System.Collections.Hashtable ReadOsRelease()
     {
-        var osInfo = new Hashtable();
+        var osInfo = new System.Collections.Hashtable();
 
         try
         {
@@ -71,7 +70,7 @@ public class About.Plug : Switchboard.Plug {
                 }
             }
         }
-        catch (Exception e)
+        catch (System.Exception e)
         {
             // Handle the exception here, such as logging or displaying an error message
             // Console.WriteLine("The file could not be read:");
