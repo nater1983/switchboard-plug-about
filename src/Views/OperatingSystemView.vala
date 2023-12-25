@@ -193,7 +193,7 @@ public class About.OperatingSystemView : Gtk.Box {
         // Upstream distro version (for "Built on" text)
         // FIXME: Add distro specific field to /etc/os-release and use that instead
         // Like "ELEMENTARY_UPSTREAM_DISTRO_NAME" or something
-        var file = File.new_for_path ("/usr/lib/upstream-os-release");
+        var file = File.new_for_path ("/etc/os-release");
         string? upstream_release = null;
         try {
             var dis = new DataInputStream (yield file.read_async ());
